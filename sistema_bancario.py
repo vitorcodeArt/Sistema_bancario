@@ -371,5 +371,3 @@ def main():
         else:
             print("\nOpção inválida.")
 main()
-     
-        
