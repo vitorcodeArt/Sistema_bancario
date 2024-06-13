@@ -27,7 +27,9 @@ class Conta:
         self._numero = numero
         self._agencia = "0001"
         self._cliente = cliente
-        self._historico = Historico()
+        self._historico = Historico() 
+        self.num_saques = 0
+        self.data_ult_saque = ""
         
     @classmethod
     def nova_conta(cls, numero, cliente):
@@ -60,8 +62,8 @@ class Conta:
         if excedeu_saldo:
             print("\nOperação falhou! Você não tem saldo suficiente.")
         elif valor > 0:
-            self._saldo -= valor
-            print(f"\nOperação realizada com sucesso!\nSaldo atual: R$ {self._saldo:.2f}")
+            saldo -= valor
+            print(f"\nOperação realizada com sucesso!\nSaldo atual: R$ {self.saldo:.2f}")
             return True
         else:
             print("\nOperação falhou! Valor inválido.")
@@ -84,24 +86,17 @@ class ContaCorrente(Conta):
         
     def sacar(self, valor):
         
-        data_ult_saque = ""
         data_atual = datetime.now().strftime('%d/%m/%Y')
-        
-        def numero_saques(data_atual, data_ult_saque):
-            numero_saques = 0
-            if data_atual == data_ult_saque or data_ult_saque == 0:
                 
-                data_ult_saque = data_atual
-                numero_saques += 1
-            else:
-                numero_saques = 0
-                numero_saques += 1
-            return numero_saques
-        
-        numero_saques = numero_saques(data_atual, data_ult_saque)
-                 
+        if data_atual == self.data_ult_saque or self.data_ult_saque == "":
+            self.num_saques += 1
+            self.data_ult_saque = data_atual
+        else:
+            self.num_saques = 1
+            self.data_ult_saque = data_atual
+                                 
         excedeu_limite = valor > self._limite
-        excedeu_saque = numero_saques > self._limite_saques
+        excedeu_saque = self.num_saques > self._limite_saques
         
         if excedeu_limite:
             print("\nOperação falhou! Você excedeu o valor limite.")
@@ -244,9 +239,9 @@ def exibir_extrato(cliente):
     else:
         for transacao in transacoes:
             if transacao["tipo"] == "Deposito":
-                extrato += f"\n{transacao['tipo']}\tR$ {transacao['valor']:.2f}\t{transacao['data']}"
+                extrato += f"\n{transacao['tipo']}\t+R$ {transacao['valor']:.2f}\t{transacao['data']}"
             elif transacao["tipo"] == "Saque":
-                extrato += f"\n{transacao['tipo']}\t\tR$ {transacao['valor']:.2f}\t{transacao['data']}"
+                extrato += f"\n{transacao['tipo']}\t\t-R$ {transacao['valor']:.2f}\t{transacao['data']}"
                 
             
     print(extrato)
@@ -320,9 +315,9 @@ def cadastrar_cliente(clientes):
     # bairro = input("Bairro: ")
     # cidade = input("Cidade: ")
     # estado = limite_caracteres("Estado (sigla): ", 2)
-    # cliente_endereco = f"{logradouro}, {numero} - {bairro}, {cidade}, {estado}"
     cliente_endereco = f"{logradouro}, {numero}"
-    
+    # cliente_endereco = f"{logradouro}, {numero} - {bairro}, {cidade}, {estado}"
+
     novo_cliente = PessoaFisica(cpf=cpf, nome=cliente_nome, data_nascimento=cliente_data_nasc, endereco=cliente_endereco)
     
     clientes.append(novo_cliente)
@@ -352,7 +347,6 @@ def menu_conta(usuario):
     [x]\tSair
     => """
     return input(textwrap.dedent(menu))
-
 
 def main():
     clientes = []
